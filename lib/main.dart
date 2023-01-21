@@ -16,7 +16,7 @@ class ToDoApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'To Do App',
       theme: darkTheme,
-      home: const Home(),
+      home: const HomeScreen(),
     );
   }
 }
