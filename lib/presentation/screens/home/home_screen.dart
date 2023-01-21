@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:to_do_app/data/models/list.dart';
-import 'package:to_do_app/presentation/screens/add_task/add_task.dart';
+import 'package:to_do_app/presentation/screens/add_task/add_task_screen.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
+import 'package:to_do_app/src/constants/theme/colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,6 +15,11 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var now = DateTime.now();
+    var formatter = DateFormat('MMMM D, yyyy');
+
+    double screenWidth = MediaQuery.of(context).size.width;
+
     ListItems list = ListItems(
         incompleted: ListItems.todoIncompletedList(),
         completed: ListItems.todoCompletedList());
@@ -21,7 +28,25 @@ class HomeScreen extends StatelessWidget {
       onPressedAction: () => navigateTo(context),
       child: Column(
         children: [
-          TopBar(),
+          TopBar(
+            children: [
+              Row(children: [
+                Expanded(
+                    child: Text(
+                  formatter.format(now),
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.08,
+                      fontWeight: FontWeight.bold,
+                      color: titleTextColor),
+                )),
+                Image(
+                  image: AssetImage('assets/usuario.png'),
+                  width: 40,
+                ),
+              ]),
+              DescriptionText("5 incomplete, 5 completed"),
+            ],
+          ),
           ListToDo(
             title: "Incompleted",
             items: list.incompleted,

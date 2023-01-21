@@ -21,7 +21,7 @@ class ListToDo extends StatelessWidget {
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Container(
-                      margin: EdgeInsets.fromLTRB(0, 10, 0, 12),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
                       child: Text(
                         title,
                         style: TextStyle(
@@ -49,7 +49,7 @@ class ListToDo extends StatelessWidget {
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Container(
-                      margin: EdgeInsets.fromLTRB(0, 10, 0, 12),
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
                       child: Text(
                         title,
                         style: TextStyle(
