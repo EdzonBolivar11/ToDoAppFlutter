@@ -14,62 +14,35 @@ class ListToDo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return title == "Incompleted"
-        ? Expanded(
-            child: Column(
-              children: [
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    )),
-                Expanded(
-                  child: ListView.builder(
-                    physics: AlwaysScrollableScrollPhysics(
-                        parent: ClampingScrollPhysics()),
-                    itemCount: items.length,
-                    itemBuilder: (context, i) {
-                      return ItemToDo(item: items[i]);
-                    },
+    return Expanded(
+      child: Column(
+        children: [
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
-                )
-              ],
-            ),
+                ),
+              )),
+          Expanded(
+            child: StreamBuilder(builder: (_, AsyncSnapshot snapshot) {
+              return ListView.builder(
+                physics: AlwaysScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics()),
+                itemCount: items.length,
+                itemBuilder: (context, i) {
+                  return ItemToDo(item: items[i]);
+                },
+              );
+            }),
           )
-        : Expanded(
-            child: Column(
-              children: [
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    )),
-                Expanded(
-                  child: ListView.builder(
-                    physics: AlwaysScrollableScrollPhysics(
-                        parent: ClampingScrollPhysics()),
-                    itemCount: items.length,
-                    itemBuilder: (context, i) {
-                      return ItemToDo(item: items[i]);
-                    },
-                  ),
-                )
-              ],
-            ),
-          );
+        ],
+      ),
+    );
   }
 }
