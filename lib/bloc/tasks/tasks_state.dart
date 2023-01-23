@@ -21,3 +21,5 @@ class TasksError extends TasksState {
 
   const TasksError(this.message);
 }
+
+class TasksNoInternetState extends TasksState {}

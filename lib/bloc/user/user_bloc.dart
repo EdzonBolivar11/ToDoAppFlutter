@@ -1,8 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:to_do_app/data/models/user/token.dart';
-import 'package:to_do_app/data/repositories/task_repository.dart';
+import 'package:to_do_app/data/datas.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';

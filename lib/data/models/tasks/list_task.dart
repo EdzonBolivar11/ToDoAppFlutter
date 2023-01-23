@@ -72,13 +72,13 @@ class Fields {
     this.date,
     this.categoryId,
     this.name,
-    this.isCompleted,
-  });
+    IsCompleted? isCompleted,
+  }) : isCompleted = isCompleted ?? IsCompleted();
 
   Date? date;
   CategoryId? categoryId;
   CategoryId? name;
-  IsCompleted? isCompleted;
+  IsCompleted isCompleted;
 
   factory Fields.fromJson(Map<String, dynamic> json) => Fields(
         date: json["date"] == null ? null : Date.fromJson(json["date"]),
@@ -86,25 +86,23 @@ class Fields {
             ? null
             : CategoryId.fromJson(json["categoryId"]),
         name: json["name"] == null ? null : CategoryId.fromJson(json["name"]),
-        isCompleted: json["isCompleted"] == null
-            ? null
-            : IsCompleted.fromJson(json["isCompleted"]),
+        isCompleted: IsCompleted.fromJson(json["isCompleted"]),
       );
 
   Map<String, dynamic> toJson() => {
         "date": date?.toJson(),
         "categoryId": categoryId?.toJson(),
         "name": name?.toJson(),
-        "isCompleted": isCompleted?.toJson(),
+        "isCompleted": isCompleted.toJson(),
       };
 }
 
 class CategoryId {
   CategoryId({
-    this.stringValue,
+    this.stringValue = "",
   });
 
-  String? stringValue;
+  String stringValue;
 
   factory CategoryId.fromJson(Map<String, dynamic> json) => CategoryId(
         stringValue: json["stringValue"],
@@ -133,10 +131,10 @@ class Date {
 
 class IsCompleted {
   IsCompleted({
-    this.booleanValue,
+    this.booleanValue = false,
   });
 
-  bool? booleanValue;
+  bool booleanValue;
 
   factory IsCompleted.fromJson(Map<String, dynamic> json) => IsCompleted(
         booleanValue: json["booleanValue"],

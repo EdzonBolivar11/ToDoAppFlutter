@@ -13,7 +13,12 @@ class UserLoading extends UserState {}
 
 class UserLoaded extends UserState {
   final TokenModel tokenModel;
-  const UserLoaded(this.tokenModel);
+  UserLoaded(this.tokenModel) {
+    if (tokenModel.idToken != "") {
+      StorageProvider.writeData(
+          StorageItem("token", tokenModelToJson(tokenModel)));
+    }
+  }
 }
 
 class UserError extends UserState {

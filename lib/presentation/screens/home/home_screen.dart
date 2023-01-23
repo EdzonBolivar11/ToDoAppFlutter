@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_app/bloc/blocs.dart';
-import 'package:to_do_app/data/models/list.dart';
-import 'package:to_do_app/data/models/list_task.dart';
-import 'package:to_do_app/presentation/screens/add_task/add_task_screen.dart';
+import 'package:to_do_app/data/datas.dart';
+import 'package:to_do_app/presentation/screens/screens.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
@@ -17,13 +16,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _tasksBloc = TasksBloc();
-  final _userBloc = UserBloc();
-
   @override
   void initState() {
-    _tasksBloc.add(GetListTask());
-    _userBloc.add(Login());
     super.initState();
   }
 
@@ -34,16 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ListItems list = ListItems(
-        incompleted: ListItems.todoIncompletedList(),
-        completed: ListItems.todoCompletedList());
-
     return Screen(
       onPressedAction: () => navigateTo(context),
-      child: BlocProvider(
-        create: (context) => _tasksBloc,
-        child: BlocBuilder<TasksBloc, TasksState>(
-            builder: ((_, state) => _build(context, state))),
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (_, state) => BlocBuilder<TasksBloc, TasksState>(
+            builder: (_, state) => _build(context, state)),
       ),
     );
   }
@@ -70,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 40,
           ),
         ]),
-        DescriptionText("5 incomplete, 5 completed"),
+        CategoryText("5 incomplete, 5 completed"),
       ],
     );
   }
@@ -84,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           children: [
             _buildTopBar(),
-            _buildLists(context, (state as TasksLoaded).listTaskModel)
+            ..._buildLists(context, (state as TasksLoaded).listTaskModel)
           ],
         );
       case TasksError:
@@ -103,8 +92,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildLists(BuildContext context, ListTaskModel state) {
-    return Container();
+  List<Widget> _buildLists(BuildContext context, ListTaskModel state) {
+    List<Document> incompleted = [];
+    List<Document> completed = [];
+    if (state.documents != null) {
+      incompleted = state.documents as List<Document>;
+      completed = state.documents as List<Document>;
+
+      incompleted
+          .retainWhere((e) => (e.fields?.isCompleted.booleanValue as bool));
+
+      completed
+          .retainWhere((e) => !(e.fields?.isCompleted.booleanValue as bool));
+    }
+
+    return <Widget>[
+      Expanded(
+        child: ListToDo(title: "Incompleted", listTasks: incompleted),
+      ),
+      Expanded(
+        child: ListToDo(title: "Completed", listTasks: completed),
+      )
+    ];
   }
 
   Widget _buildLoading() => const Center(child: CircularProgressIndicator());

@@ -1,6 +1,4 @@
-import 'package:to_do_app/data/models/list_task.dart';
-import 'package:to_do_app/data/models/user/token.dart';
-import 'package:to_do_app/data/providers/api/api.dart';
+import 'package:to_do_app/data/datas.dart';
 
 class ApiRepository {
   final _provider = ApiProvider();

@@ -1,8 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:to_do_app/data/models/list_task.dart';
-import 'package:to_do_app/data/repositories/task_repository.dart';
+import 'package:to_do_app/data/datas.dart';
 
 part 'tasks_event.dart';
 part 'tasks_state.dart';
@@ -10,7 +9,7 @@ part 'tasks_state.dart';
 class TasksBloc extends Bloc<TasksEvent, TasksState> {
   final _apiRepository = ApiRepository();
 
-  TasksBloc() : super(TasksInitial()) {
+  TasksBloc() : super(TasksLoading()) {
     on<GetListTask>(_getTasks);
   }
 
