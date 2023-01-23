@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:to_do_app/bloc/blocs.dart';
 import 'package:to_do_app/data/datas.dart';
 import 'package:to_do_app/presentation/screens/screens.dart';
@@ -21,15 +22,74 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  void navigateTo(BuildContext context) {
+  void handleSelectDay(selectedDay, focusedDay, closeDialog) {
+    closeDialog();
+
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => AddTaskScreen()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => AddTaskScreen(
+                  selectedDay: selectedDay,
+                )));
+    //closeDialog();
+  }
+
+  void handleOpenCalendar(BuildContext context) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (contextD) {
+        return Dialog(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TableCalendar(
+                  calendarStyle: CalendarStyle(
+                    todayDecoration: const BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  focusedDay: DateTime.now(),
+                  firstDay: DateTime.now(),
+                  lastDay: DateTime.now().add(Duration(days: 365)),
+                  headerStyle: HeaderStyle(
+                    titleCentered: true,
+                    formatButtonVisible: false,
+                    leftChevronIcon: Icon(
+                      Icons.chevron_left,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    rightChevronIcon: Icon(
+                      Icons.chevron_right,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                  onDaySelected: ((selectedDay, focusedDay) => handleSelectDay(
+                      selectedDay, focusedDay, () => Navigator.pop(contextD))),
+                  selectedDayPredicate: (day) => isSameDay(DateTime.now(), day),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Screen(
-      onPressedAction: () => navigateTo(context),
+      onPressedAction: () => handleOpenCalendar(context),
       child: BlocBuilder<UserBloc, UserState>(
         builder: (_, state) => BlocBuilder<TasksBloc, TasksState>(
             builder: (_, state) => _build(context, state)),
