@@ -96,8 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Document> incompleted = [];
     List<Document> completed = [];
     if (state.documents != null) {
-      incompleted = state.documents as List<Document>;
-      completed = state.documents as List<Document>;
+      incompleted = List.from(state.documents!);
+      completed = List.from(state.documents!);
 
       incompleted
           .retainWhere((e) => (e.fields?.isCompleted.booleanValue as bool));
@@ -111,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListToDo(title: "Incompleted", listTasks: incompleted),
       ),
       Expanded(
+        flex: 2,
         child: ListToDo(title: "Completed", listTasks: completed),
       )
     ];

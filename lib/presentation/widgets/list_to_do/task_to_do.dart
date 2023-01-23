@@ -33,6 +33,7 @@ class TaskToDo extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         task.fields!.name!.stringValue,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 17, color: titleTextColor),
                       ),
                     ),
@@ -50,14 +51,17 @@ class TaskToDo extends StatelessWidget {
             children: [
               Align(
                 child: CustomCheckbox(
+                  isChecked: true,
                   onChange: handleChange,
                 ),
               ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  child: CategoryText(
-                    task.fields!.categoryId!.stringValue,
-                  ))
+              Expanded(
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: CategoryText(
+                      task.fields!.name!.stringValue,
+                    )),
+              )
             ],
           );
   }

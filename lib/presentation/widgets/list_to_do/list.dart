@@ -19,13 +19,16 @@ class ListToDo extends StatelessWidget {
       return Align(alignment: Alignment.center, child: Text(emptyMessage!));
     }
 
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-      itemCount: listTasks.length,
-      itemBuilder: (context, i) {
-        return TaskToDo(task: listTasks[i]);
-      },
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+        itemCount: listTasks.length,
+        itemBuilder: (context, i) {
+          return TaskToDo(task: listTasks[i]);
+        },
+      ),
     );
   }
 

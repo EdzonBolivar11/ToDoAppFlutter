@@ -20,6 +20,8 @@ class CategoryText extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             text,
+            softWrap: false,
+            maxLines: 5,
             style: TextStyle(
                 fontSize: fontSize,
                 color: subtitleTextColor,
