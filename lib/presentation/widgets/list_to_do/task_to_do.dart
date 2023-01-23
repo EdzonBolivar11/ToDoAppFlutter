@@ -1,22 +1,22 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
-import 'package:to_do_app/data/models/item.dart';
+import 'package:to_do_app/data/datas.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
-class ItemToDo extends StatelessWidget {
-  final Item item;
+class TaskToDo extends StatelessWidget {
+  final Document task;
 
-  const ItemToDo({Key? key, required this.item}) : super(key: key);
+  const TaskToDo({Key? key, required this.task}) : super(key: key);
 
   handleChange() {
-    item.done = !item.done;
+    //task.done = !task.done;
   }
 
   @override
   Widget build(BuildContext context) {
-    return !item.done
+    return task.fields!.isCompleted.booleanValue
         ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Align(
               alignment: Alignment.topLeft,
@@ -32,12 +32,13 @@ class ItemToDo extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        item.title,
+                        task.fields!.name!.stringValue,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 17, color: titleTextColor),
                       ),
                     ),
-                    DescriptionText(
-                      item.description,
+                    CategoryText(
+                      task.fields!.categoryId!.stringValue,
                       margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
                       fontSize: 15,
                     ),
@@ -50,12 +51,17 @@ class ItemToDo extends StatelessWidget {
             children: [
               Align(
                 child: CustomCheckbox(
+                  isChecked: true,
                   onChange: handleChange,
                 ),
               ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  child: DescriptionText(item.title))
+              Expanded(
+                child: Container(
+                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: CategoryText(
+                      task.fields!.name!.stringValue,
+                    )),
+              )
             ],
           );
   }

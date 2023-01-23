@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
-class DescriptionText extends StatelessWidget {
+class CategoryText extends StatelessWidget {
   final String text;
   final EdgeInsets margin;
   final double fontSize;
 
-  const DescriptionText(this.text,
+  const CategoryText(this.text,
       {Key? key,
       this.margin = const EdgeInsets.symmetric(vertical: 10),
       this.fontSize = 17})
@@ -20,6 +20,8 @@ class DescriptionText extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(
             text,
+            softWrap: false,
+            maxLines: 5,
             style: TextStyle(
                 fontSize: fontSize,
                 color: subtitleTextColor,
