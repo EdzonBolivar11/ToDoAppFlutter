@@ -18,6 +18,10 @@ class ApiRepository {
   Future<TaskModel> postTask(TaskModel taskModel) {
     return _provider.postTask(taskModel);
   }
+
+  Future<TaskModel> patchTask(TaskModel taskModel) {
+    return _provider.patchTask(taskModel);
+  }
 }
 
 class NetworkError extends Error {}

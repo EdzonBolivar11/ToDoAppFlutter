@@ -48,6 +48,12 @@ class CategoryModel {
   DateTime? createTime;
   DateTime? updateTime;
 
+  String get id {
+    return name!.replaceAll(
+        "projects/applaudo-todo-app/databases/(default)/documents/categories/",
+        "");
+  }
+
   factory CategoryModel.fromJson(Map<String, dynamic> json) => CategoryModel(
         name: json["name"],
         fields: FieldsCategory.fromJson(json["fields"]),

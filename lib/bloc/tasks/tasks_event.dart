@@ -14,3 +14,9 @@ class PostTask extends TasksEvent {
 
   const PostTask({required this.taskModel});
 }
+
+class UpdateTask extends TasksEvent {
+  final TaskModel taskModel;
+
+  const UpdateTask({required this.taskModel});
+}

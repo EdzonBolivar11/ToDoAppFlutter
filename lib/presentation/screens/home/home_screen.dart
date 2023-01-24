@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void handleNavigate() => Navigator.push(
-      context, MaterialPageRoute(builder: (context) => AddTaskScreen()));
+      context, MaterialPageRoute(builder: (context) => AddUptadeTaskScreen()));
 
   void handleSelectDay(selectedDay, focusedDay, closeDialog) {
     closeDialog();

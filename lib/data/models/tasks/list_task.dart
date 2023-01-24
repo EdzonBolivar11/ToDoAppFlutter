@@ -57,6 +57,11 @@ class TaskModel {
   DateTime? updateTime;
   String? error;
 
+  String get id {
+    return name!.replaceAll(
+        "projects/applaudo-todo-app/databases/(default)/documents/tasks/", "");
+  }
+
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
         name: json["name"],
         fields:

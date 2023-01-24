@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:to_do_app/data/datas.dart';
+import 'package:to_do_app/presentation/screens/screens.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
@@ -10,8 +11,17 @@ class TaskToDo extends StatelessWidget {
 
   const TaskToDo({Key? key, required this.task}) : super(key: key);
 
-  handleChange() {
-    //task.done = !task.done;
+  handleChange() {}
+
+  handleTap(context) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => AddUptadeTaskScreen(
+                  title: "Update Task",
+                  submitButtonText: "Update",
+                  taskModel: task,
+                )));
   }
 
   @override
@@ -25,24 +35,27 @@ class TaskToDo extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        task.fields!.name!.stringValue,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 17, color: titleTextColor),
+              child: GestureDetector(
+                onTap: () => handleTap(context),
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          task.fields!.name!.stringValue,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 17, color: titleTextColor),
+                        ),
                       ),
-                    ),
-                    CategoryText(
-                      task.fields!.categoryId!.stringValue,
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
-                      fontSize: 15,
-                    ),
-                  ],
+                      CategoryText(
+                        task.fields!.categoryId!.stringValue,
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 15),
+                        fontSize: 15,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             )
@@ -56,11 +69,14 @@ class TaskToDo extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Container(
-                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child: CategoryText(
-                      task.fields!.name!.stringValue,
-                    )),
+                child: GestureDetector(
+                  onTap: () => handleTap(context),
+                  child: Container(
+                      margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: CategoryText(
+                        task.fields!.name!.stringValue,
+                      )),
+                ),
               )
             ],
           );
