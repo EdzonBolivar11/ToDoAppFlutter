@@ -4,7 +4,7 @@ import 'package:to_do_app/presentation/widgets/list_to_do/task_to_do.dart';
 
 class ListToDo extends StatelessWidget {
   final String title;
-  final List<Document> listTasks;
+  final List<TaskModel> listTasks;
   final String? emptyMessage;
 
   const ListToDo(

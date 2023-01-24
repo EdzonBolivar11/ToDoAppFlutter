@@ -22,16 +22,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  void handleNavigate() => Navigator.push(
+      context, MaterialPageRoute(builder: (context) => AddTaskScreen()));
+
   void handleSelectDay(selectedDay, focusedDay, closeDialog) {
     closeDialog();
-
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => AddTaskScreen(
-                  selectedDay: selectedDay,
-                )));
-    //closeDialog();
   }
 
   void handleOpenCalendar(BuildContext context) {
@@ -89,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Screen(
-      onPressedAction: () => handleOpenCalendar(context),
+      onPressedAction: handleNavigate,
       child: BlocBuilder<UserBloc, UserState>(
         builder: (_, state) => BlocBuilder<TasksBloc, TasksState>(
             builder: (_, state) => _build(context, state)),
@@ -153,8 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> _buildLists(BuildContext context, ListTaskModel state) {
-    List<Document> incompleted = [];
-    List<Document> completed = [];
+    List<TaskModel> incompleted = [];
+    List<TaskModel> completed = [];
     if (state.documents != null) {
       incompleted = List.from(state.documents!);
       completed = List.from(state.documents!);

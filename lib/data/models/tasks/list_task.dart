@@ -11,15 +11,15 @@ class ListTaskModel {
     this.nextPageToken,
   });
 
-  List<Document>? documents;
+  List<TaskModel>? documents;
   String? nextPageToken;
   String? error;
 
   factory ListTaskModel.fromJson(Map<String, dynamic> json) => ListTaskModel(
         documents: json["documents"] == null
             ? []
-            : List<Document>.from(
-                json["documents"]!.map((x) => Document.fromJson(x))),
+            : List<TaskModel>.from(
+                json["documents"]!.map((x) => TaskModel.fromJson(x))),
         nextPageToken: json["nextPageToken"],
       );
 
@@ -33,10 +33,18 @@ class ListTaskModel {
   ListTaskModel.withError(String message) {
     error = message;
   }
+
+  copyWith({
+    List<TaskModel>? documents,
+    String? nextPageToken,
+  }) =>
+      ListTaskModel(
+          documents: documents ?? this.documents,
+          nextPageToken: nextPageToken ?? this.nextPageToken);
 }
 
-class Document {
-  Document({
+class TaskModel {
+  TaskModel({
     this.name,
     this.fields,
     this.createTime,
@@ -47,8 +55,9 @@ class Document {
   FieldsTask? fields;
   DateTime? createTime;
   DateTime? updateTime;
+  String? error;
 
-  factory Document.fromJson(Map<String, dynamic> json) => Document(
+  factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
         name: json["name"],
         fields:
             json["fields"] == null ? null : FieldsTask.fromJson(json["fields"]),
@@ -66,6 +75,22 @@ class Document {
         "createTime": createTime?.toIso8601String(),
         "updateTime": updateTime?.toIso8601String(),
       };
+
+  factory TaskModel.copyWith() {
+    return TaskModel(
+        name: "",
+        fields: FieldsTask(
+            date: Date(integerValue: ""),
+            categoryId: CategoryId(stringValue: ""),
+            name: TaskName(stringValue: ""),
+            isCompleted: IsCompleted(booleanValue: false)),
+        createTime: DateTime.now(),
+        updateTime: DateTime.now());
+  }
+
+  TaskModel.withError(String message) {
+    error = message;
+  }
 }
 
 class FieldsTask {
@@ -78,7 +103,7 @@ class FieldsTask {
 
   Date? date;
   CategoryId? categoryId;
-  CategoryId? name;
+  TaskName? name;
   IsCompleted isCompleted;
 
   factory FieldsTask.fromJson(Map<String, dynamic> json) => FieldsTask(
@@ -86,7 +111,7 @@ class FieldsTask {
         categoryId: json["categoryId"] == null
             ? null
             : CategoryId.fromJson(json["categoryId"]),
-        name: json["name"] == null ? null : CategoryId.fromJson(json["name"]),
+        name: json["name"] == null ? null : TaskName.fromJson(json["name"]),
         isCompleted: IsCompleted.fromJson(json["isCompleted"]),
       );
 
@@ -114,12 +139,28 @@ class CategoryId {
       };
 }
 
-class Date {
-  Date({
-    this.integerValue,
+class TaskName {
+  TaskName({
+    this.stringValue = "",
   });
 
-  String? integerValue;
+  String stringValue;
+
+  factory TaskName.fromJson(Map<String, dynamic> json) => TaskName(
+        stringValue: json["stringValue"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "stringValue": stringValue,
+      };
+}
+
+class Date {
+  Date({
+    this.integerValue = "",
+  });
+
+  String integerValue;
 
   factory Date.fromJson(Map<String, dynamic> json) => Date(
         integerValue: json["integerValue"],

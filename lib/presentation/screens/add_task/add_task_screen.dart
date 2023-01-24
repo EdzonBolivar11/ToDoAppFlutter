@@ -7,11 +7,10 @@ import 'package:to_do_app/bloc/blocs.dart';
 import 'package:to_do_app/data/datas.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
+import 'package:to_do_app/src/helpers/extensions/color.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  final DateTime selectedDay;
-
-  const AddTaskScreen({Key? key, required this.selectedDay}) : super(key: key);
+  const AddTaskScreen({Key? key}) : super(key: key);
 
   @override
   State<AddTaskScreen> createState() => _AddTaskScreenState();
@@ -21,7 +20,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   late TextEditingController _whenController = TextEditingController();
-  String _firstDate = "";
+  final String _firstDate = DateFormat('DD/MM/yyyy').format(DateTime.now());
+  final _formKey = GlobalKey<FormState>();
+  final TaskModel _taskModel = TaskModel.copyWith();
+  dynamic errors = {};
 
   String dropdownvalue = 'Item 1';
 
@@ -33,11 +35,11 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = widget.selectedDay;
-    _focusedDay = widget.selectedDay;
-    _firstDate = DateFormat('DD/MM/yyyy').format(widget.selectedDay);
     _whenController = TextEditingController(text: _firstDate);
     _categoriesBloc.add(GetListCategories());
+    errors = {"title": false, "category": false, "date": false};
+    _taskModel.fields!.date!.integerValue =
+        DateTime.now().microsecondsSinceEpoch.toString().substring(0, 10);
   }
 
   @override
@@ -52,16 +54,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       child: BlocProvider<CategoriesBloc>(
         create: (context) => _categoriesBloc,
         child: BlocBuilder<CategoriesBloc, CategoriesState>(
-          builder: (_, state) => _build(context, state),
+          builder: _build,
         ),
       ),
     );
-  }
-
-  onChangeDropdown(selectedCategory) {
-    setState(() {
-      _selectedCategory = selectedCategory;
-    });
   }
 
   Widget _build(BuildContext context, CategoriesState state) {
@@ -75,7 +71,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
         return Column(children: [
           _buildTopBar(context),
-          ..._buildBody(context),
+          _buildBody(context),
         ]);
       case CategoriesError:
       default:
@@ -131,65 +127,60 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   void handlePressgoBack(BuildContext context) => Navigator.pop(context);
 
-  List<Widget> _buildBody(BuildContext context) {
-    return <Widget>[
-      SizedBox(
-        height: 10,
-      ),
-      CustomTextField(
-        label: "Title",
-      ),
-      SizedBox(
-        height: 15,
-      ),
-      CustomTextField(
-        label: "Category",
-        child: Row(children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(width: 1, color: Color(0xFF747476)))),
-              child: DropdownBelow(
-                itemWidth: MediaQuery.of(context).size.width * .9,
-                itemTextstyle: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
-                boxTextstyle: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
-                boxPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                boxHeight: 55,
-                hint: Text(
-                  'Category',
-                  style: TextStyle(fontSize: 14, color: Color(0xFFABAAAC)),
-                ),
-                value: _selectedCategory,
-                items: _dropdownCategories,
-                onChanged: onChangeDropdown,
-                dropdownColor: Color(0xFF2C2B30),
-              ),
-            ),
-          )
-        ]),
-      ),
-      SizedBox(
-        height: 15,
-      ),
-      CustomTextField(
-        label: "When?",
-        enabled: false,
-        icon: Icon(Icons.calendar_month),
-        onPressed: () => handlePressCalendar(context),
-        controller: _whenController,
-      ),
-      SizedBox(
-        height: 20,
-      ),
-      ElevatedButton(onPressed: handlePressAdd, child: Text("Add")),
-    ];
+  Widget _buildBody(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(children: [
+        SizedBox(
+          height: 10,
+        ),
+        CustomTextField(
+          label: "Title",
+          hasError: errors["title"],
+          errorText: "Required",
+          onChanged: (value) => setState(() {
+            _taskModel.fields!.name!.stringValue = value;
+            errors["title"] = value.isEmpty;
+          }),
+        ),
+        SizedBox(
+          height: 15,
+        ),
+        CustomTextField(
+          label: "Category",
+          errorText: "Required",
+          enabled: false,
+          child: Container(child: _buildCategoryField()),
+        ),
+        SizedBox(
+          height: 15,
+        ),
+        CustomTextField(
+          label: "When?",
+          errorText: "Required",
+          enabled: false,
+          icon: Icon(Icons.calendar_month),
+          onPressed: () => handlePressCalendar(context),
+          controller: _whenController,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        ElevatedButton(
+            onPressed: () => handlePressAdd(context), child: Text("Add")),
+      ]),
+    );
+  }
+
+  onChangeDropdown(CategoryModel selectedCategory) {
+    setState(() {
+      _selectedCategory = selectedCategory;
+      _taskModel.fields!.categoryId!.stringValue = selectedCategory.name!
+          .replaceAll(
+              "projects/applaudo-todo-app/databases/(default)/documents/categories/",
+              "");
+    });
+    handleError("category", false);
   }
 
   List<DropdownMenuItem> buildDropdownTestItems(
@@ -228,13 +219,15 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     return items;
   }
 
-  void handlePressAdd() {}
-
   void handleSelectDay(selectedDay, focusedDay, stfSetState) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       stfSetState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
+        _taskModel.fields!.date!.integerValue = (selectedDay as DateTime)
+            .microsecondsSinceEpoch
+            .toString()
+            .substring(0, 10);
       });
       _whenController.text = DateFormat('DD/MM/yyyy').format(selectedDay);
       Navigator.pop(context);
@@ -294,22 +287,81 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 
-  Widget _buildLoading() => const Center(child: CircularProgressIndicator());
-}
-
-extension HexColor on Color {
-  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
+  Widget _buildCategoryField() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border(
+                    bottom: BorderSide(
+                        width: 1,
+                        color: errors["category"]
+                            ? Colors.red
+                            : Color(0xFF747476)))),
+            child: DropdownBelow(
+              itemWidth: MediaQuery.of(context).size.width * .9,
+              itemTextstyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white),
+              boxTextstyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white),
+              boxPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              boxHeight: 55,
+              hint: Text(
+                'Category',
+                style: TextStyle(fontSize: 14, color: Color(0xFFABAAAC)),
+              ),
+              value: _selectedCategory,
+              items: _dropdownCategories,
+              onChanged: ((value) => onChangeDropdown(value)),
+              dropdownColor: Color(0xFF2C2B30),
+            ),
+          ),
+        )
+      ]),
+      Container(
+        padding: errors["category"]
+            ? EdgeInsets.symmetric(vertical: 10, horizontal: 20)
+            : null,
+        child: errors["category"]
+            ? Text(
+                "Required",
+                style: TextStyle(color: Colors.red, fontSize: 13),
+              )
+            : null,
+      )
+    ]);
   }
 
-  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
-  String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
-      '${alpha.toRadixString(16).padLeft(2, '0')}'
-      '${red.toRadixString(16).padLeft(2, '0')}'
-      '${green.toRadixString(16).padLeft(2, '0')}'
-      '${blue.toRadixString(16).padLeft(2, '0')}';
+  void handlePressAdd(BuildContext context) {
+    if (_taskModel.fields!.name!.stringValue.isEmpty) {
+      handleError("title", true);
+    }
+
+    if (_taskModel.fields!.categoryId!.stringValue.isEmpty) {
+      handleError("category", true);
+    }
+
+    if (_taskModel.fields!.date!.integerValue.isEmpty) {
+      handleError("date", true);
+    }
+
+    if (errors.toString().contains("true")) return;
+
+    context.read<TasksBloc>().add(PostTask(taskModel: _taskModel));
+    Navigator.pop(context);
+  }
+
+  void handleError(String key, bool value) {
+    setState(() {
+      errors[key] = value;
+    });
+  }
+
+  //Loading
+  Widget _buildLoading() => const Center(child: CircularProgressIndicator());
 }

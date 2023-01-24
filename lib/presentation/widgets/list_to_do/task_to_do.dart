@@ -6,7 +6,7 @@ import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
 class TaskToDo extends StatelessWidget {
-  final Document task;
+  final TaskModel task;
 
   const TaskToDo({Key? key, required this.task}) : super(key: key);
 

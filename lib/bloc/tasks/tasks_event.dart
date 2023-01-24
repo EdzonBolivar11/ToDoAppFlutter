@@ -8,3 +8,9 @@ abstract class TasksEvent extends Equatable {
 }
 
 class GetListTask extends TasksEvent {}
+
+class PostTask extends TasksEvent {
+  final TaskModel taskModel;
+
+  const PostTask({required this.taskModel});
+}

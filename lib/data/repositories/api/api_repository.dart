@@ -14,6 +14,10 @@ class ApiRepository {
   Future<ListCategoriesModel> getCategories() {
     return _provider.getCategories();
   }
+
+  Future<TaskModel> postTask(TaskModel taskModel) {
+    return _provider.postTask(taskModel);
+  }
 }
 
 class NetworkError extends Error {}
