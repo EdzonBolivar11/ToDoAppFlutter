@@ -16,7 +16,7 @@ class ToDoApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => UserBloc()..add(Login())),
-        BlocProvider(create: (_) => TasksBloc()..add(GetListTask()))
+        BlocProvider(create: (_) => TasksBloc()..add(GetListTask())),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

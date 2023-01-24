@@ -9,37 +9,60 @@ import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 import 'package:to_do_app/src/helpers/extensions/color.dart';
 
-class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({Key? key}) : super(key: key);
+class AddUptadeTaskScreen extends StatefulWidget {
+  final TaskModel? taskModel;
+  final String? title;
+  final String? submitButtonText;
+  const AddUptadeTaskScreen(
+      {Key? key,
+      this.taskModel,
+      this.title = "New Task",
+      this.submitButtonText = "Add"})
+      : super(key: key);
 
   @override
-  State<AddTaskScreen> createState() => _AddTaskScreenState();
+  State<AddUptadeTaskScreen> createState() => _AddUptadeTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
+class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   late TextEditingController _whenController = TextEditingController();
+  late TextEditingController _titleController = TextEditingController();
   final String _firstDate = DateFormat('DD/MM/yyyy').format(DateTime.now());
   final _formKey = GlobalKey<FormState>();
-  final TaskModel _taskModel = TaskModel.copyWith();
+  TaskModel _taskModel = TaskModel.copyWith();
   dynamic errors = {};
 
   String dropdownvalue = 'Item 1';
 
   List<DropdownMenuItem> _dropdownCategories = [];
-  var _selectedCategory;
+  late CategoryModel _selectedCategory;
 
   final CategoriesBloc _categoriesBloc = CategoriesBloc();
 
   @override
   void initState() {
     super.initState();
-    _whenController = TextEditingController(text: _firstDate);
+    _titleController = TextEditingController(
+        text: widget.taskModel != null
+            ? widget.taskModel!.fields!.name!.stringValue
+            : "");
+    _whenController = TextEditingController(
+        text: widget.taskModel != null
+            ? DateFormat('DD/MM/yyyy').format(
+                DateTime.fromMillisecondsSinceEpoch(
+                    int.parse(widget.taskModel!.fields!.date!.integerValue) *
+                        1000))
+            : _firstDate);
     _categoriesBloc.add(GetListCategories());
     errors = {"title": false, "category": false, "date": false};
     _taskModel.fields!.date!.integerValue =
-        DateTime.now().microsecondsSinceEpoch.toString().substring(0, 10);
+        DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10);
+
+    if (widget.taskModel != null) {
+      _taskModel = widget.taskModel!;
+    }
   }
 
   @override
@@ -68,6 +91,16 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       case CategoriesLoaded:
         _dropdownCategories = buildDropdownTestItems(
             (state as CategoriesLoaded).listCategoriesModel);
+        try {
+          if (widget.taskModel != null) {
+            _selectedCategory = state.listCategoriesModel.documents!.firstWhere(
+                (e) => e.name!.contains(
+                    widget.taskModel!.fields!.categoryId!.stringValue));
+
+            onChangeDropdown(_selectedCategory);
+          }
+          // ignore: empty_catches
+        } catch (e) {}
 
         return Column(children: [
           _buildTopBar(context),
@@ -113,7 +146,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(
-              "New Task",
+              widget.title!,
               style: TextStyle(
                   fontSize: screenWidth * 0.08,
                   fontWeight: FontWeight.bold,
@@ -142,6 +175,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             _taskModel.fields!.name!.stringValue = value;
             errors["title"] = value.isEmpty;
           }),
+          controller: _titleController,
         ),
         SizedBox(
           height: 15,
@@ -167,7 +201,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           height: 20,
         ),
         ElevatedButton(
-            onPressed: () => handlePressAdd(context), child: Text("Add")),
+            onPressed: () => handlePressAdd(context),
+            child: Text(widget.submitButtonText!)),
       ]),
     );
   }
@@ -175,10 +210,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   onChangeDropdown(CategoryModel selectedCategory) {
     setState(() {
       _selectedCategory = selectedCategory;
-      _taskModel.fields!.categoryId!.stringValue = selectedCategory.name!
-          .replaceAll(
-              "projects/applaudo-todo-app/databases/(default)/documents/categories/",
-              "");
+      _taskModel.fields!.categoryId!.stringValue = selectedCategory.id;
     });
     handleError("category", false);
   }
@@ -225,7 +257,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
         _taskModel.fields!.date!.integerValue = (selectedDay as DateTime)
-            .microsecondsSinceEpoch
+            .millisecondsSinceEpoch
             .toString()
             .substring(0, 10);
       });
@@ -352,7 +384,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
     if (errors.toString().contains("true")) return;
 
-    context.read<TasksBloc>().add(PostTask(taskModel: _taskModel));
+    if (widget.title == "Add") {
+      context.read<TasksBloc>().add(PostTask(taskModel: _taskModel));
+    } else {
+      context.read<TasksBloc>().add(UpdateTask(taskModel: _taskModel));
+    }
+
     Navigator.pop(context);
   }
 
