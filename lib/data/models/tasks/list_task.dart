@@ -44,13 +44,14 @@ class Document {
   });
 
   String? name;
-  Fields? fields;
+  FieldsTask? fields;
   DateTime? createTime;
   DateTime? updateTime;
 
   factory Document.fromJson(Map<String, dynamic> json) => Document(
         name: json["name"],
-        fields: json["fields"] == null ? null : Fields.fromJson(json["fields"]),
+        fields:
+            json["fields"] == null ? null : FieldsTask.fromJson(json["fields"]),
         createTime: json["createTime"] == null
             ? null
             : DateTime.parse(json["createTime"]),
@@ -67,8 +68,8 @@ class Document {
       };
 }
 
-class Fields {
-  Fields({
+class FieldsTask {
+  FieldsTask({
     this.date,
     this.categoryId,
     this.name,
@@ -80,7 +81,7 @@ class Fields {
   CategoryId? name;
   IsCompleted isCompleted;
 
-  factory Fields.fromJson(Map<String, dynamic> json) => Fields(
+  factory FieldsTask.fromJson(Map<String, dynamic> json) => FieldsTask(
         date: json["date"] == null ? null : Date.fromJson(json["date"]),
         categoryId: json["categoryId"] == null
             ? null

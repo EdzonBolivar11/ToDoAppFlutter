@@ -8,5 +8,3 @@ abstract class TasksEvent extends Equatable {
 }
 
 class GetListTask extends TasksEvent {}
-
-class TaskNoInternetEvent extends TasksEvent {}

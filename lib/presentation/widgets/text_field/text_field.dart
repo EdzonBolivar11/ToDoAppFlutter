@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final Icon? icon;
   final VoidCallback? onPressed;
   final TextEditingController? controller;
+  final Widget? child;
 
   const CustomTextField(
       {Key? key,
@@ -15,7 +16,8 @@ class CustomTextField extends StatelessWidget {
       this.enabled = true,
       this.icon,
       this.onPressed,
-      this.controller})
+      this.controller,
+      this.child})
       : super(key: key);
 
   @override
@@ -28,16 +30,17 @@ class CustomTextField extends StatelessWidget {
                 topLeft: Radius.circular(3), topRight: Radius.circular(3)),
             color: Color(0xFF2C2B30),
           ),
-          child: TextField(
-            controller: controller,
-            enabled: enabled,
-            decoration: InputDecoration(
-              labelText: label,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-              suffixIcon: icon,
-            ),
-          ),
+          child: child ??
+              TextField(
+                controller: controller,
+                enabled: enabled,
+                decoration: InputDecoration(
+                  labelText: label,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                  suffixIcon: icon,
+                ),
+              ),
         ));
   }
 }
