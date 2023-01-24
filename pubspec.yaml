@@ -36,6 +36,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.1.1
+  flutter_colorpicker: ^1.0.3
   flutter_secure_storage: ^7.0.1
   intl: ^0.18.0
   table_calendar: ^3.0.9

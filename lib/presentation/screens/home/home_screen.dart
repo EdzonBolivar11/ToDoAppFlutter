@@ -17,19 +17,36 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  String _titleDate = "";
+
+  var now = DateTime.now();
+  var formatter = DateFormat.yMMMMd('en_US');
+
   @override
   void initState() {
     super.initState();
+    _titleDate = formatter.format(_focusedDay);
   }
 
   void handleNavigate() => Navigator.push(
       context, MaterialPageRoute(builder: (context) => AddUptadeTaskScreen()));
 
-  void handleSelectDay(selectedDay, focusedDay, closeDialog) {
+  void handleSelectDay(
+      selectedDay, focusedDay, closeDialog, BuildContext context) {
+    setState(() {
+      _focusedDay = focusedDay;
+      _selectedDay = selectedDay;
+      _titleDate = formatter.format(focusedDay);
+    });
+
+    context.read<TasksBloc>().add(FilterTasks(dateTime: focusedDay));
+
     closeDialog();
   }
 
-  void handleOpenCalendar(BuildContext context) {
+  void handlePressCalendar(BuildContext context) {
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -52,10 +69,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  focusedDay: DateTime.now(),
-                  firstDay: DateTime.now(),
+                  focusedDay: _focusedDay,
+                  firstDay: DateTime.now().add(Duration(days: -365)),
                   lastDay: DateTime.now().add(Duration(days: 365)),
                   headerStyle: HeaderStyle(
+                    titleTextFormatter: (date, locale) =>
+                        DateFormat.yMMM(locale).format(date),
                     titleCentered: true,
                     formatButtonVisible: false,
                     leftChevronIcon: Icon(
@@ -70,7 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onDaySelected: ((selectedDay, focusedDay) => handleSelectDay(
-                      selectedDay, focusedDay, () => Navigator.pop(contextD))),
+                      selectedDay,
+                      focusedDay,
+                      () => Navigator.pop(contextD),
+                      context)),
                   selectedDayPredicate: (day) => isSameDay(DateTime.now(), day),
                 ),
               ],
@@ -93,28 +115,49 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTopBar() {
-    var now = DateTime.now();
-    var formatter = DateFormat('MMMM D, yyyy');
-
     double screenWidth = MediaQuery.of(context).size.width;
 
     return TopBar(
       children: [
         Row(children: [
           Expanded(
-              child: Text(
-            formatter.format(now),
-            style: TextStyle(
-                fontSize: screenWidth * 0.08,
-                fontWeight: FontWeight.bold,
-                color: titleTextColor),
+              child: GestureDetector(
+            onTap: () => handlePressCalendar(context),
+            child: Row(
+              children: [
+                Text(
+                  _titleDate,
+                  style: TextStyle(
+                      fontSize: screenWidth * 0.07,
+                      fontWeight: FontWeight.bold,
+                      color: titleTextColor),
+                ),
+                SizedBox(
+                  width: 6,
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.blue,
+                )
+              ],
+            ),
           )),
           Image(
             image: AssetImage('assets/usuario.png'),
             width: 40,
           ),
         ]),
-        CategoryText("5 incomplete, 5 completed"),
+        BlocBuilder<TasksBloc, TasksState>(
+          builder: (context, state) {
+            if (state is TasksLoaded) {
+              dynamic lists =
+                  getCompletedIncompletedList((state).listTaskModel!);
+              return CategoryText(
+                  "${lists["incompleted"].length} incomplete, ${lists["completed"].length} completed");
+            }
+            return CategoryText("");
+          },
+        ),
       ],
     );
   }
@@ -128,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           children: [
             _buildTopBar(),
-            ..._buildLists(context, (state as TasksLoaded).listTaskModel),
+            ..._buildLists(context, (state as TasksLoaded).listTaskModel!),
           ],
         );
       case TasksError:
@@ -148,8 +191,22 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget> _buildLists(BuildContext context, ListTaskModel state) {
+    dynamic lists = getCompletedIncompletedList(state);
+
+    return <Widget>[
+      Expanded(
+        child: ListToDo(title: "Incompleted", listTasks: lists["incompleted"]),
+      ),
+      Expanded(
+        child: ListToDo(title: "Completed", listTasks: lists["completed"]),
+      )
+    ];
+  }
+
+  dynamic getCompletedIncompletedList(ListTaskModel state) {
     List<TaskModel> incompleted = [];
     List<TaskModel> completed = [];
+
     if (state.documents != null) {
       incompleted = List.from(state.documents!);
       completed = List.from(state.documents!);
@@ -161,14 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .retainWhere((e) => (e.fields?.isCompleted.booleanValue as bool));
     }
 
-    return <Widget>[
-      Expanded(
-        child: ListToDo(title: "Incompleted", listTasks: incompleted),
-      ),
-      Expanded(
-        child: ListToDo(title: "Completed", listTasks: completed),
-      )
-    ];
+    return {"incompleted": incompleted, "completed": completed};
   }
 
   Widget _buildLoading() => const Center(child: CircularProgressIndicator());

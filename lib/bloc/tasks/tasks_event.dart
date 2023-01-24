@@ -20,3 +20,9 @@ class UpdateTask extends TasksEvent {
 
   const UpdateTask({required this.taskModel});
 }
+
+class FilterTasks extends TasksEvent {
+  final DateTime dateTime;
+
+  const FilterTasks({required this.dateTime});
+}

@@ -94,7 +94,7 @@ class ApiProvider {
       _dio.options.headers['content-Type'] = 'application/json';
       _dio.options.headers["authorization"] = "Bearer $token";
 
-      Response response = await _dio.get(ApiConstants.getCategoriesURL);
+      Response response = await _dio.get(ApiConstants.categoriesURL);
       return ListCategoriesModel.fromJson(response.data);
     } on DioError catch (e) {
       return ListCategoriesModel.withError(e.message);
@@ -174,6 +174,38 @@ class ApiProvider {
       return TaskModel.withError(e.message);
     } catch (error) {
       return TaskModel.withError(error.toString());
+    }
+  }
+
+  Future<CategoryModel> postCategory(CategoryModel cat) async {
+    try {
+      String? token = "";
+
+      await StorageProvider.readData("token").then((value) {
+        if (value != "") {
+          token = tokenModelFromJson(value).idToken;
+        }
+      });
+      _dio.options.headers['content-Type'] = 'application/json';
+      _dio.options.headers["authorization"] = "Bearer $token";
+
+      var body = {
+        "fields": {
+          "name": {"stringValue": cat.fields!.name!.stringValue},
+          "color": {"stringValue": cat.fields!.color!.stringValue},
+        },
+      };
+
+      Response response = await _dio.post(
+        ApiConstants.categoriesURL,
+        data: jsonEncode(body),
+      );
+
+      return CategoryModel.fromJson(response.data);
+    } on DioError catch (e) {
+      return CategoryModel.withError(e.message);
+    } catch (error) {
+      return CategoryModel.withError(error.toString());
     }
   }
 }
