@@ -43,6 +43,13 @@ class ListTaskModel {
       ListTaskModel(
           documents: documents ?? this.documents,
           nextPageToken: nextPageToken ?? this.nextPageToken);
+
+  factory ListTaskModel.copyWith({
+    required ListTaskModel obj,
+  }) =>
+      ListTaskModel(documents: obj.documents, nextPageToken: obj.nextPageToken);
+
+  ListTaskModel.clone(ListTaskModel obj);
 }
 
 class TaskModel {

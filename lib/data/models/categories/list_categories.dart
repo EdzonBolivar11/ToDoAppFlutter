@@ -33,6 +33,11 @@ class ListCategoriesModel {
   ListCategoriesModel.withError(String message) {
     error = message;
   }
+
+  factory ListCategoriesModel.copyWith({
+    required ListCategoriesModel obj,
+  }) =>
+      ListCategoriesModel(documents: obj.documents);
 }
 
 class CategoryModel {
@@ -47,7 +52,7 @@ class CategoryModel {
   FieldsCategory? fields;
   DateTime? createTime;
   DateTime? updateTime;
-
+  String? error;
   String get id {
     return name!.replaceAll(
         "projects/applaudo-todo-app/databases/(default)/documents/categories/",
@@ -67,6 +72,10 @@ class CategoryModel {
         "createTime": createTime?.toIso8601String(),
         "updateTime": updateTime?.toIso8601String(),
       };
+
+  CategoryModel.withError(String message) {
+    error = message;
+  }
 }
 
 class FieldsCategory {

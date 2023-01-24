@@ -2,8 +2,9 @@ part of 'tasks_bloc.dart';
 
 abstract class TasksState extends Equatable {
   final ListTaskModel? listsTasks;
+  final ListTaskModel? filteredlistsTasks;
 
-  const TasksState({this.listsTasks});
+  const TasksState({this.listsTasks, this.filteredlistsTasks});
 }
 
 class TasksInitial extends TasksState {
@@ -21,8 +22,12 @@ class TasksLoading extends TasksState {
 }
 
 class TasksLoaded extends TasksState {
-  final ListTaskModel listTaskModel;
-  const TasksLoaded(this.listTaskModel) : super(listsTasks: listTaskModel);
+  final ListTaskModel? listTaskModel;
+  final ListTaskModel? filteredlistsTasksModel;
+  const TasksLoaded({this.listTaskModel, this.filteredlistsTasksModel})
+      : super(
+            listsTasks: listTaskModel,
+            filteredlistsTasks: filteredlistsTasksModel);
 
   @override
   List<Object?> get props => [];

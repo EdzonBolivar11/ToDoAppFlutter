@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:to_do_app/bloc/blocs.dart';
 import 'package:to_do_app/data/datas.dart';
+import 'package:to_do_app/presentation/screens/screens.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 import 'package:to_do_app/src/helpers/extensions/color.dart';
@@ -29,7 +30,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
   DateTime _selectedDay = DateTime.now();
   late TextEditingController _whenController = TextEditingController();
   late TextEditingController _titleController = TextEditingController();
-  final String _firstDate = DateFormat('DD/MM/yyyy').format(DateTime.now());
+  final String _firstDate = DateFormat.yMMMMd('en_US').format(DateTime.now());
   final _formKey = GlobalKey<FormState>();
   TaskModel _taskModel = TaskModel.copyWith();
   dynamic errors = {};
@@ -37,7 +38,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
   String dropdownvalue = 'Item 1';
 
   List<DropdownMenuItem> _dropdownCategories = [];
-  late CategoryModel _selectedCategory;
+  var _selectedCategory;
 
   final CategoriesBloc _categoriesBloc = CategoriesBloc();
 
@@ -50,7 +51,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
             : "");
     _whenController = TextEditingController(
         text: widget.taskModel != null
-            ? DateFormat('DD/MM/yyyy').format(
+            ? DateFormat.yMMMMd('en_US').format(
                 DateTime.fromMillisecondsSinceEpoch(
                     int.parse(widget.taskModel!.fields!.date!.integerValue) *
                         1000))
@@ -89,11 +90,11 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
       case CategoriesLoading:
         return _buildLoading();
       case CategoriesLoaded:
-        _dropdownCategories = buildDropdownTestItems(
-            (state as CategoriesLoaded).listCategoriesModel);
+        _dropdownCategories =
+            buildDropdownTestItems((state as CategoriesLoaded).listCategories!);
         try {
           if (widget.taskModel != null) {
-            _selectedCategory = state.listCategoriesModel.documents!.firstWhere(
+            _selectedCategory = state.listCategories?.documents!.firstWhere(
                 (e) => e.name!.contains(
                     widget.taskModel!.fields!.categoryId!.stringValue));
 
@@ -160,6 +161,9 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
 
   void handlePressgoBack(BuildContext context) => Navigator.pop(context);
 
+  void handleNavigation(BuildContext context) => Navigator.push(
+      context, MaterialPageRoute(builder: (context) => AddCategoryScreen()));
+
   Widget _buildBody(BuildContext context) {
     return Form(
       key: _formKey,
@@ -180,11 +184,31 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
         SizedBox(
           height: 15,
         ),
-        CustomTextField(
-          label: "Category",
-          errorText: "Required",
-          enabled: false,
-          child: Container(child: _buildCategoryField()),
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                label: "Category",
+                errorText: "Required",
+                enabled: false,
+                child: Container(child: _buildCategoryField()),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => handleNavigation(context),
+              child: Container(
+                  margin: EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.blue),
+                  width: 40,
+                  height: 40,
+                  child: Icon(
+                    size: 25,
+                    Icons.add_circle_outline,
+                  )),
+            ),
+          ],
         ),
         SizedBox(
           height: 15,
@@ -261,7 +285,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
             .toString()
             .substring(0, 10);
       });
-      _whenController.text = DateFormat('DD/MM/yyyy').format(selectedDay);
+      _whenController.text = DateFormat.yMMMMd('en_US').format(selectedDay);
       Navigator.pop(context);
     }
   }
@@ -353,7 +377,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
               dropdownColor: Color(0xFF2C2B30),
             ),
           ),
-        )
+        ),
       ]),
       Container(
         padding: errors["category"]
@@ -384,7 +408,7 @@ class _AddUptadeTaskScreenState extends State<AddUptadeTaskScreen> {
 
     if (errors.toString().contains("true")) return;
 
-    if (widget.title == "Add") {
+    if (widget.submitButtonText == "Add") {
       context.read<TasksBloc>().add(PostTask(taskModel: _taskModel));
     } else {
       context.read<TasksBloc>().add(UpdateTask(taskModel: _taskModel));

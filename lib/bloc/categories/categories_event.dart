@@ -8,3 +8,9 @@ abstract class CategoriesEvent extends Equatable {
 }
 
 class GetListCategories extends CategoriesEvent {}
+
+class PostCategory extends CategoriesEvent {
+  final CategoryModel categoryModel;
+
+  const PostCategory({required this.categoryModel});
+}

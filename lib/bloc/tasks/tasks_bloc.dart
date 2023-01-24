@@ -13,24 +13,48 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     on<GetListTask>(_getTasks);
     on<PostTask>(_postTask);
     on<UpdateTask>(_updateTask);
+    on<FilterTasks>(_filterTasks);
+  }
+
+  DateTime ConvertToDate(String date) {
+    DateTime newDate =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
+    return dateOnly(newDate);
+  }
+
+  DateTime dateOnly(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
   }
 
   Future<void> _getTasks(event, emit) async {
     try {
       emit(TasksLoading());
       final list = await _apiRepository.getTasks();
-      emit(TasksLoaded(list));
+
+      ListTaskModel listFiltered = ListTaskModel().copyWith(
+          documents: list.documents, nextPageToken: list.nextPageToken);
+      final List<TaskModel> filteredList = List.from(listFiltered.documents!);
+
+      filteredList.retainWhere((t) =>
+          ConvertToDate(t.fields!.date!.integerValue) ==
+          dateOnly(DateTime.now()));
+
+      listFiltered.documents = filteredList;
+
+      emit(TasksLoaded(
+          listTaskModel: list, filteredlistsTasksModel: listFiltered));
       if (list.error != null) {
         emit(TasksError(list.error));
       }
-    } on NetworkError {
+    } catch (e) {
       emit(TasksError("Failed to get data. Try again later."));
     }
   }
 
   Future<void> _postTask(PostTask event, emit) async {
     final state = this.state;
-    final documents = [...state.listsTasks!.documents!];
+    final original = [...state.listsTasks!.documents!];
+    final filtered = [...state.filteredlistsTasks!.documents!];
 
     try {
       emit(TasksLoading());
@@ -39,17 +63,30 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       if (task.error != null) {
         emit(TasksError(task.error));
       } else {
+        original.add(task);
+
+        if (filtered.isNotEmpty) {
+          // ignore: unrelated_type_equality_checks
+          if (ConvertToDate(task.fields!.date!.integerValue).day ==
+              ConvertToDate(filtered[0].fields!.date!.integerValue)) {
+            filtered.add(task);
+          }
+        }
+
         emit(TasksLoaded(
-            state.listsTasks!.copyWith(documents: [...documents, task])));
+            listTaskModel: state.listsTasks!.copyWith(documents: [...original]),
+            filteredlistsTasksModel:
+                state.filteredlistsTasks!.copyWith(documents: [...filtered])));
       }
-    } on NetworkError {
+    } catch (e) {
       emit(TasksError("Failed to post data. Try again later."));
     }
   }
 
   Future<void> _updateTask(UpdateTask event, emit) async {
     final state = this.state;
-    final documents = [...state.listsTasks!.documents!];
+    final original = [...state.listsTasks!.documents!];
+    final filtered = [...state.filteredlistsTasks!.documents!];
 
     try {
       emit(TasksLoading());
@@ -58,14 +95,47 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       if (task.error != null) {
         emit(TasksError(task.error));
       } else {
-        int i = documents.indexOf(event.taskModel);
-        documents[i] = event.taskModel;
+        if (filtered.isNotEmpty) {
+          // ignore: unrelated_type_equality_checks
+          if (ConvertToDate(task.fields!.date!.integerValue).day !=
+              ConvertToDate(filtered[0].fields!.date!.integerValue)) {
+            filtered.removeWhere((element) => element.id == task.id);
+          } else {
+            int i = filtered.indexOf(task);
+            filtered[i] = task;
+          }
+        }
 
-        emit(
-            TasksLoaded(state.listsTasks!.copyWith(documents: [...documents])));
+        int i = original.indexOf(task);
+        original[i] = task;
+
+        emit(TasksLoaded(
+            listTaskModel: state.listsTasks!.copyWith(documents: [...original]),
+            filteredlistsTasksModel:
+                state.filteredlistsTasks!.copyWith(documents: [...filtered])));
       }
-    } on NetworkError {
+    } catch (e) {
       emit(TasksError("Failed to update data. Try again later."));
+    }
+  }
+
+  Future<void> _filterTasks(FilterTasks event, emit) async {
+    final state = this.state;
+    ListTaskModel listFiltered = ListTaskModel().copyWith(
+        documents: state.listsTasks!.documents,
+        nextPageToken: state.listsTasks!.nextPageToken);
+    final filteredList = [...listFiltered.documents!];
+    try {
+      filteredList.retainWhere(
+          (t) => ConvertToDate(t.fields!.date!.integerValue) == event.dateTime);
+
+      listFiltered.documents = filteredList;
+
+      emit(TasksLoaded(
+          listTaskModel: state.listsTasks!,
+          filteredlistsTasksModel: listFiltered));
+    } catch (e) {
+      emit(TasksError("Failed to filter data. Try again later."));
     }
   }
 }
