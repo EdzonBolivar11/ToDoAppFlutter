@@ -106,8 +106,11 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
           }
         }
 
-        int i = original.indexOf(task);
-        original[i] = task;
+        for (var element in original) {
+          if (element.id == task.id) {
+            element = task;
+          }
+        }
 
         emit(TasksLoaded(
             listTaskModel: state.listsTasks!.copyWith(documents: [...original]),
