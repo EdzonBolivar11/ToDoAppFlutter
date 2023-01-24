@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
 ListTaskModel listTaskModelFromJson(String str) =>
     ListTaskModel.fromJson(json.decode(str));
 
@@ -86,7 +88,7 @@ class TaskModel {
         name: "",
         fields: FieldsTask(
             date: Date(integerValue: ""),
-            categoryId: CategoryId(stringValue: ""),
+            categoryId: CategoryNameId(stringValue: ""),
             name: TaskName(stringValue: ""),
             isCompleted: IsCompleted(booleanValue: false)),
         createTime: DateTime.now(),
@@ -107,7 +109,7 @@ class FieldsTask {
   }) : isCompleted = isCompleted ?? IsCompleted();
 
   Date? date;
-  CategoryId? categoryId;
+  CategoryNameId? categoryId;
   TaskName? name;
   IsCompleted isCompleted;
 
@@ -115,7 +117,7 @@ class FieldsTask {
         date: json["date"] == null ? null : Date.fromJson(json["date"]),
         categoryId: json["categoryId"] == null
             ? null
-            : CategoryId.fromJson(json["categoryId"]),
+            : CategoryNameId.fromJson(json["categoryId"]),
         name: json["name"] == null ? null : TaskName.fromJson(json["name"]),
         isCompleted: IsCompleted.fromJson(json["isCompleted"]),
       );
@@ -128,14 +130,16 @@ class FieldsTask {
       };
 }
 
-class CategoryId {
-  CategoryId({
+class CategoryNameId {
+  CategoryNameId({
     this.stringValue = "",
   });
 
   String stringValue;
+  String? nameValue;
+  Color? color = Colors.transparent;
 
-  factory CategoryId.fromJson(Map<String, dynamic> json) => CategoryId(
+  factory CategoryNameId.fromJson(Map<String, dynamic> json) => CategoryNameId(
         stringValue: json["stringValue"],
       );
 

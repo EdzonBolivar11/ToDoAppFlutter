@@ -155,10 +155,10 @@ class _HomeScreenState extends State<HomeScreen> {
       completed = List.from(state.documents!);
 
       incompleted
-          .retainWhere((e) => (e.fields?.isCompleted.booleanValue as bool));
+          .retainWhere((e) => !(e.fields?.isCompleted.booleanValue as bool));
 
       completed
-          .retainWhere((e) => !(e.fields?.isCompleted.booleanValue as bool));
+          .retainWhere((e) => (e.fields?.isCompleted.booleanValue as bool));
     }
 
     return <Widget>[
@@ -166,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListToDo(title: "Incompleted", listTasks: incompleted),
       ),
       Expanded(
-        flex: 2,
         child: ListToDo(title: "Completed", listTasks: completed),
       )
     ];

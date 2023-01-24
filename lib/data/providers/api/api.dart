@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:to_do_app/data/datas.dart';
 import 'package:to_do_app/src/constants/api/api_constants.dart';
+import 'package:to_do_app/src/helpers/extensions/color.dart';
 
 class ApiProvider {
   final _dio = Dio();
@@ -44,7 +46,35 @@ class ApiProvider {
       _dio.options.headers["authorization"] = "Bearer $token";
 
       Response response = await _dio.get(ApiConstants.tasksURL);
-      return ListTaskModel.fromJson(response.data);
+      ListTaskModel list = ListTaskModel.fromJson(response.data);
+
+      ListCategoriesModel listCategoriesModel = await getCategories();
+
+      list.documents?.forEach((element) {
+        try {
+          CategoryModel catModel = listCategoriesModel.documents!.firstWhere(
+              (c) => c.id == element.fields!.categoryId!.stringValue);
+
+          element.fields?.categoryId?.nameValue =
+              catModel.fields?.name?.stringValue;
+
+          var hexColor = catModel.fields!.color?.stringValue;
+          hexColor = hexColor?.replaceAll("#", "");
+
+          Color color = Colors.transparent;
+
+          try {
+            color = HexColor.fromHex(hexColor!);
+            // ignore: empty_catches
+          } catch (e) {}
+
+          element.fields?.categoryId?.color = color;
+
+          // ignore: empty_catches
+        } catch (e) {}
+      });
+
+      return list;
     } on DioError catch (e) {
       return ListTaskModel.withError(e.message);
     } catch (error) {
@@ -128,7 +158,9 @@ class ApiProvider {
             "stringValue": taskModel.fields!.categoryId!.stringValue
           },
           "name": {"stringValue": taskModel.fields!.name!.stringValue},
-          "isCompleted": {"booleanValue": false}
+          "isCompleted": {
+            "booleanValue": taskModel.fields!.isCompleted.booleanValue
+          }
         }
       };
 
