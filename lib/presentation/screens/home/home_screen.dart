@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Column(
           children: [
             _buildTopBar(),
-            ..._buildLists(context, (state as TasksLoaded).listTaskModel)
+            ..._buildLists(context, (state as TasksLoaded).listTaskModel),
           ],
         );
       case TasksError:

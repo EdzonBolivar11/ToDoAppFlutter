@@ -1,6 +1,10 @@
+import 'package:dropdown_below/dropdown_below.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:to_do_app/bloc/blocs.dart';
+import 'package:to_do_app/data/datas.dart';
 import 'package:to_do_app/presentation/widgets/widgets.dart';
 import 'package:to_do_app/src/constants/theme/colors.dart';
 
@@ -17,8 +21,14 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
   late TextEditingController _whenController = TextEditingController();
-  late TextEditingController txt = TextEditingController();
   String _firstDate = "";
+
+  String dropdownvalue = 'Item 1';
+
+  List<DropdownMenuItem> _dropdownCategories = [];
+  var _selectedCategory;
+
+  final CategoriesBloc _categoriesBloc = CategoriesBloc();
 
   @override
   void initState() {
@@ -27,6 +37,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     _focusedDay = widget.selectedDay;
     _firstDate = DateFormat('DD/MM/yyyy').format(widget.selectedDay);
     _whenController = TextEditingController(text: _firstDate);
+    _categoriesBloc.add(GetListCategories());
   }
 
   @override
@@ -38,13 +49,48 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Screen(
-      child: Column(
-        children: [
-          _buildTopBar(context),
-          ..._buildBody(context),
-        ],
+      child: BlocProvider<CategoriesBloc>(
+        create: (context) => _categoriesBloc,
+        child: BlocBuilder<CategoriesBloc, CategoriesState>(
+          builder: (_, state) => _build(context, state),
+        ),
       ),
     );
+  }
+
+  onChangeDropdown(selectedCategory) {
+    setState(() {
+      _selectedCategory = selectedCategory;
+    });
+  }
+
+  Widget _build(BuildContext context, CategoriesState state) {
+    switch (state.runtimeType) {
+      case CategoriesInitial:
+      case CategoriesLoading:
+        return _buildLoading();
+      case CategoriesLoaded:
+        _dropdownCategories = buildDropdownTestItems(
+            (state as CategoriesLoaded).listCategoriesModel);
+
+        return Column(children: [
+          _buildTopBar(context),
+          ..._buildBody(context),
+        ]);
+      case CategoriesError:
+      default:
+        return AlertDialog(
+          title: const Text('An error has ocurred'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text((state as CategoriesError).message ??
+                    "Please try again later."),
+              ],
+            ),
+          ),
+        );
+    }
   }
 
   Widget _buildTopBar(BuildContext context) {
@@ -98,6 +144,36 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
       CustomTextField(
         label: "Category",
+        child: Row(children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(width: 1, color: Color(0xFF747476)))),
+              child: DropdownBelow(
+                itemWidth: MediaQuery.of(context).size.width * .9,
+                itemTextstyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white),
+                boxTextstyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white),
+                boxPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                boxHeight: 55,
+                hint: Text(
+                  'Category',
+                  style: TextStyle(fontSize: 14, color: Color(0xFFABAAAC)),
+                ),
+                value: _selectedCategory,
+                items: _dropdownCategories,
+                onChanged: onChangeDropdown,
+                dropdownColor: Color(0xFF2C2B30),
+              ),
+            ),
+          )
+        ]),
       ),
       SizedBox(
         height: 15,
@@ -114,6 +190,42 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       ),
       ElevatedButton(onPressed: handlePressAdd, child: Text("Add")),
     ];
+  }
+
+  List<DropdownMenuItem> buildDropdownTestItems(
+      ListCategoriesModel listCategories) {
+    List<DropdownMenuItem> items = [];
+    for (var i in listCategories.documents!) {
+      var hexColor = i.fields!.color?.stringValue;
+      hexColor = hexColor?.replaceAll("#", "");
+
+      Color color = Colors.transparent;
+
+      try {
+        color = HexColor.fromHex(hexColor!);
+        // ignore: empty_catches
+      } catch (e) {}
+
+      items.add(
+        DropdownMenuItem(
+          value: i,
+          child: Row(
+            children: [
+              Expanded(child: Text(i.fields!.name!.stringValue)),
+              Container(
+                width: 20.0,
+                height: 20.0,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return items;
   }
 
   void handlePressAdd() {}
@@ -181,4 +293,23 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               )),
     );
   }
+
+  Widget _buildLoading() => const Center(child: CircularProgressIndicator());
+}
+
+extension HexColor on Color {
+  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
+  static Color fromHex(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
+  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
+  String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
+      '${alpha.toRadixString(16).padLeft(2, '0')}'
+      '${red.toRadixString(16).padLeft(2, '0')}'
+      '${green.toRadixString(16).padLeft(2, '0')}'
+      '${blue.toRadixString(16).padLeft(2, '0')}';
 }

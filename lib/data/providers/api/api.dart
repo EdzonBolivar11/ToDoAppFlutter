@@ -51,4 +51,25 @@ class ApiProvider {
       return ListTaskModel.withError(error.toString());
     }
   }
+
+  Future<ListCategoriesModel> getCategories() async {
+    try {
+      String? token = "";
+
+      await StorageProvider.readData("token").then((value) {
+        if (value != "") {
+          token = tokenModelFromJson(value).idToken;
+        }
+      });
+      _dio.options.headers['content-Type'] = 'application/json';
+      _dio.options.headers["authorization"] = "Bearer $token";
+
+      Response response = await _dio.get(getCategoriesURL);
+      return ListCategoriesModel.fromJson(response.data);
+    } on DioError catch (e) {
+      return ListCategoriesModel.withError(e.message);
+    } catch (error) {
+      return ListCategoriesModel.withError(error.toString());
+    }
+  }
 }
