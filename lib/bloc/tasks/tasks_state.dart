@@ -1,25 +1,38 @@
 part of 'tasks_bloc.dart';
 
 abstract class TasksState extends Equatable {
-  const TasksState();
+  final ListTaskModel? listsTasks;
 
-  @override
-  List<Object> get props => [];
+  const TasksState({this.listsTasks});
 }
 
-class TasksInitial extends TasksState {}
+class TasksInitial extends TasksState {
+  const TasksInitial() : super(listsTasks: null);
 
-class TasksLoading extends TasksState {}
+  @override
+  List<Object?> get props => [];
+}
+
+class TasksLoading extends TasksState {
+  const TasksLoading() : super(listsTasks: null);
+
+  @override
+  List<Object?> get props => [];
+}
 
 class TasksLoaded extends TasksState {
   final ListTaskModel listTaskModel;
-  const TasksLoaded(this.listTaskModel);
+  const TasksLoaded(this.listTaskModel) : super(listsTasks: listTaskModel);
+
+  @override
+  List<Object?> get props => [];
 }
 
 class TasksError extends TasksState {
+  @override
+  List<Object?> get props => [];
+
   final String? message;
 
-  const TasksError(this.message);
+  const TasksError(this.message) : super(listsTasks: null);
 }
-
-class TasksNoInternetState extends TasksState {}

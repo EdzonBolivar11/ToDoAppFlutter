@@ -11,6 +11,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
 
   TasksBloc() : super(TasksLoading()) {
     on<GetListTask>(_getTasks);
+    on<PostTask>(_postTask);
   }
 
   Future<void> _getTasks(event, emit) async {
@@ -20,6 +21,25 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       emit(TasksLoaded(list));
       if (list.error != null) {
         emit(TasksError(list.error));
+      }
+    } on NetworkError {
+      emit(TasksError("Failed to get data. Try again later."));
+    }
+  }
+
+  Future<void> _postTask(PostTask event, emit) async {
+    final state = this.state;
+    final documents = [...state.listsTasks!.documents!];
+
+    try {
+      emit(TasksLoading());
+      final task = await _apiRepository.postTask(event.taskModel);
+
+      if (task.error != null) {
+        emit(TasksError(task.error));
+      } else {
+        emit(TasksLoaded(
+            state.listsTasks!.copyWith(documents: [...documents, task])));
       }
     } on NetworkError {
       emit(TasksError("Failed to get data. Try again later."));

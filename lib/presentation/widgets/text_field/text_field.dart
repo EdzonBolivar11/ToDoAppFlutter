@@ -8,6 +8,9 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onPressed;
   final TextEditingController? controller;
   final Widget? child;
+  final bool hasError;
+  final String errorText;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField(
       {Key? key,
@@ -17,7 +20,10 @@ class CustomTextField extends StatelessWidget {
       this.icon,
       this.onPressed,
       this.controller,
-      this.child})
+      this.child,
+      this.hasError = false,
+      this.errorText = "Error",
+      this.onChanged})
       : super(key: key);
 
   @override
@@ -25,6 +31,7 @@ class CustomTextField extends StatelessWidget {
     return GestureDetector(
         onTap: () => onPressed?.call(),
         child: Container(
+          padding: EdgeInsets.only(bottom: hasError ? 10 : 0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(3), topRight: Radius.circular(3)),
@@ -32,15 +39,16 @@ class CustomTextField extends StatelessWidget {
           ),
           child: child ??
               TextField(
-                controller: controller,
-                enabled: enabled,
-                decoration: InputDecoration(
-                  labelText: label,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                  suffixIcon: icon,
-                ),
-              ),
+                  controller: controller,
+                  enabled: enabled,
+                  decoration: InputDecoration(
+                    labelText: label,
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 20.0, vertical: 15),
+                    suffixIcon: icon,
+                    errorText: hasError ? errorText : null,
+                  ),
+                  onChanged: onChanged),
         ));
   }
 }
